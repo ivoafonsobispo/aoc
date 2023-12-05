@@ -29,18 +29,52 @@ func main() {
 
 	filePath := os.Args[1]
 
-	file, err := os.Open(filePath)
+	input, err := readInput(filePath)
 	if err != nil {
-		fmt.Println("Error opening file:", err)
-		os.Exit(1)
+		fmt.Println("Error reading input:", err)
+		return
+	}
+
+	// Solve the problem
+	resultPart1 := solvePart1(input)
+	fmt.Println("Part 1:", resultPart1)
+
+	resultPart2 := solvePart2(input)
+	fmt.Println("Part 2:", resultPart2)
+}
+
+func readInput(filename string) ([]string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
 	}
 	defer file.Close()
 
+	var lines []string
 	scanner := bufio.NewScanner(file)
-
-	sum := 0
 	for scanner.Scan() {
-		line := scanner.Text()
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
+}
+
+func solvePart1(input []string) int {
+	sum := 0
+	for _, line := range input {
+		result, err := strconv.Atoi(strconv.Itoa(getFirstInt(line)) + strconv.Itoa(getLastInt(line)))
+		if err != nil {
+			fmt.Println("Error converting string to integer:", err)
+			os.Exit(1)
+		}
+		sum += result
+	}
+
+	return sum
+}
+
+func solvePart2(input []string) int {
+	sum := 0
+	for _, line := range input {
 		for k, v := range numbers {
 			line = strings.Replace(line, k, v, -1)
 		}
@@ -53,12 +87,7 @@ func main() {
 		sum += result
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Println("Error reading file:", err)
-		os.Exit(1)
-	}
-
-	fmt.Println(sum)
+	return sum
 }
 
 func getFirstInt(s string) int {
